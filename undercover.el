@@ -126,6 +126,25 @@ Otherwise, return nil."
 ;; https://github.com/emacs-mirror/emacs/commit/62cf8f1649468fc2f6c4f8926ab5c4bb184bfbe8
 (def-edebug-spec gv-define-setter (&define name :name gv-setter sexp def-body))
 
+;; https://github.com/emacs-mirror/emacs/commit/fc01cfc82db3878570373d31f80e486f9f33ecff
+(def-edebug-spec cl-loop (&rest &or
+                                ;; These are usually followed by a symbol, but it can
+                                ;; actually be any destructuring-bind pattern, which
+                                ;; would erroneously match `form'.
+                                [[&or "for" "as" "with" "and"] sexp]
+                                ;; These are followed by expressions which could
+                                ;; erroneously match `symbolp'.
+                                [[&or "from" "upfrom" "downfrom" "to" "upto" "downto"
+                                      "above" "below" "by" "in" "on" "=" "across"
+                                      "repeat" "while" "until" "always" "never"
+                                      "thereis" "collect" "append" "nconc" "sum"
+                                      "count" "maximize" "minimize" "if" "unless"
+                                      "return"]
+                                 form]
+                                ["using" (symbolp symbolp)]
+                                ;; Simple default, which covers 99% of the cases.
+                                symbolp form)
+
 (defun undercover--fallback-file-handler (operation args)
   "Handle any file OPERATION with ARGS."
   (let ((inhibit-file-name-handlers
